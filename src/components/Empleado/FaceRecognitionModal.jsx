@@ -18,6 +18,8 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
   const [feedback, setFeedback] = useState('Cargando modelos...');
   const [loading, setLoading] = useState(true);
 
+  const [bordeEstado, setBordeEstado] = useState('neutral');
+
   useEffect(() => {
     if (show) iniciar();
     return limpiar;
@@ -40,7 +42,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
   const iniciarDeteccion = () => {
     const video = webcamRef.current.video;
     let intentos = 0;
-    const maxIntentos = 40;
+    const maxIntentos = 30;
 
     intervaloRef.current = setInterval(async () => {
       if (!video || procesandoRef.current || yaFinalizadoRef.current) return;
@@ -51,6 +53,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
 
       if (!detection) {
         if (intentos % 5 === 0) setFeedback('No se detecta tu rostro');
+        setBordeEstado('error');
         if (intentos >= maxIntentos) finalizarProceso(false);
         return;
       }
@@ -62,11 +65,15 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
 
       if (sizeRatio < 0.2) {
         if (intentos % 5 === 0) setFeedback('Acércate un poco más');
+        setBordeEstado('error');
       } else if (sizeRatio > 0.6) {
         if (intentos % 5 === 0) setFeedback('Aléjate un poco');
+        setBordeEstado('error');
       } else if (deviation > 50) {
         if (intentos % 5 === 0) setFeedback('Centra tu rostro');
+        setBordeEstado('error');
       } else {
+        setBordeEstado('ok'); 
         finalizarProceso(true);
       }
     }, 700);

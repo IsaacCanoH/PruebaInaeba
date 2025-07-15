@@ -31,9 +31,13 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
   };
 
   const iniciar = () => {
-    setFeedback('Buscando rostro...');
+    setFeedback('Prepara tu rostro, comenzaremos en 3 segundos...');
     setLoading(false);
-    iniciarDeteccion();
+
+    setTimeout(() => {
+      setFeedback('Buscando rostro...');
+      iniciarDeteccion();
+    }, 3000);
   };
 
   const iniciarDeteccion = () => {

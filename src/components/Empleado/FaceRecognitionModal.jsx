@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
-import { Modal, Spinner } from 'react-bootstrap';
 import * as faceapi from 'face-api.js';
 import { compareDescriptors } from '../../services/faceApiService';
 import { guardarFotoRostro, obtenerFotoRostro } from '../../services/dashboard/fotoRostroService';
@@ -17,8 +16,6 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
 
   const [feedback, setFeedback] = useState('Cargando modelos...');
   const [loading, setLoading] = useState(true);
-
-  const [bordeEstado, setBordeEstado] = useState('neutral');
 
   useEffect(() => {
     if (show) iniciar();
@@ -53,7 +50,6 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
 
       if (!detection) {
         if (intentos % 5 === 0) setFeedback('No se detecta tu rostro');
-        setBordeEstado('error');
         if (intentos >= maxIntentos) finalizarProceso(false);
         return;
       }
@@ -65,22 +61,18 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
 
       if (sizeRatio < 0.2) {
         if (intentos % 5 === 0) setFeedback('Acércate un poco más');
-        setBordeEstado('error');
       } else if (sizeRatio > 0.6) {
         if (intentos % 5 === 0) setFeedback('Aléjate un poco');
-        setBordeEstado('error');
       } else if (deviation > 50) {
         if (intentos % 5 === 0) setFeedback('Centra tu rostro');
-        setBordeEstado('error');
       } else {
-        setBordeEstado('ok'); 
         finalizarProceso(true);
       }
     }, 700);
   };
 
   const finalizarProceso = (exito) => {
-    if (yaFinalizadoRef.current) return; // Evita múltiples ejecuciones
+    if (yaFinalizadoRef.current) return;
     yaFinalizadoRef.current = true;
 
     clearInterval(intervaloRef.current);
@@ -129,7 +121,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
       }
     } catch (err) {
       console.error(err);
-      showError('Error al procesar rostro');
+      console.error('Error al procesar rostro');
       onFailure?.();
     }
   };
@@ -143,30 +135,43 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
     return canvas.toDataURL('image/jpeg');
   };
 
+  if (!show) return null;
+
   return (
-    <Modal show={show} onHide={onClose} centered backdrop="static">
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>Reconocimiento Facial</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="text-center">
-        {loading && <Spinner animation="border" />}
-        <div className="feedback-container">
-          <h5>Instrucciones</h5>
-          <p>{feedback}</p>
+    <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-dialog-centered" role="document">
+        <div className="modal-content">
+
+          <div className="modal-header bg-primary text-white">
+            <h5 className="modal-title">Reconocimiento Facial</h5>
+            <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={onClose}></button>
+          </div>
+
+          <div className="modal-body text-center">
+            {loading && <div className="spinner-border text-primary mb-3" role="status"></div>}
+
+            <div className="feedback-container mb-3">
+              <h5>Instrucciones</h5>
+              <p>{feedback}</p>
+            </div>
+
+            <div className="face-recognition-container mb-3">
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{ facingMode: 'user' }}
+                className="face-webcam"
+              />
+              <div className="camera-overlay"></div>
+            </div>
+
+            <p className="face-instructions">Coloca tu rostro al centro del círculo y mantén una distancia adecuada.</p>
+          </div>
+
         </div>
-        <div className="face-recognition-container">
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            videoConstraints={{ facingMode: 'user' }}
-            className="face-webcam"
-          />
-          <div className="camera-overlay"></div>
-        </div>
-        <p className="face-instructions">Coloca tu rostro al centro del círculo y mantén una distancia adecuada.</p>
-      </Modal.Body>
-    </Modal>
+      </div>
+    </div>
   );
 };
 

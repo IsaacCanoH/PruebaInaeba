@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
 import { Modal, Spinner } from 'react-bootstrap';
 import * as faceapi from 'face-api.js';
-import { loadModels, compareDescriptors } from '../../services/faceApiService';
+import { compareDescriptors } from '../../services/faceApiService';
 import { guardarFotoRostro, obtenerFotoRostro } from '../../services/dashboard/fotoRostroService';
 import { useToast } from '../../context/ToastContext';
 import './FaceRecognitionModal.css';
@@ -11,7 +11,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
   const webcamRef = useRef(null);
   const intervaloRef = useRef(null);
   const procesandoRef = useRef(false);
-  const yaFinalizadoRef = useRef(false); 
+  const yaFinalizadoRef = useRef(false);
 
   const { showError } = useToast();
 
@@ -31,18 +31,12 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
     setLoading(true);
   };
 
-  const iniciar = async () => {
-    try {
-      await loadModels();
-      setFeedback('Modelos cargados. Buscando rostro...');
-      setLoading(false);
-      iniciarDeteccion();
-    } catch (err) {
-      console.error(err);
-      showError('Error al cargar modelos');
-      onFailure?.();
-    }
+  const iniciar = () => {
+    setFeedback('Buscando rostro...');
+    setLoading(false);
+    iniciarDeteccion();
   };
+
 
   const iniciarDeteccion = () => {
     const video = webcamRef.current.video;
@@ -76,7 +70,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
       } else {
         finalizarProceso(true);
       }
-    }, 500); 
+    }, 500);
   };
 
   const finalizarProceso = (exito) => {

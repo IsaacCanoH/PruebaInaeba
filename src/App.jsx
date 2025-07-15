@@ -2,11 +2,16 @@ import React from "react";
 import { useEffect } from "react";
 import AppRoutes from "./routes/AppRoutes"
 import { precargarCatalogos } from "./services/register/catalogosCacheService";
+import { loadModels } from "./services/faceApiService";
 
 const App = () => {
   useEffect(() => {
     precargarCatalogos();
-  }, []); 
+
+    loadModels()
+      .then(() => console.log("Modelos de reconocimiento facial precargados"))
+      .catch(err => console.error("Error al cargar modelos:", err));
+  }, []);
 
   return (
     <div>

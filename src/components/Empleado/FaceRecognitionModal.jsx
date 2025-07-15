@@ -37,11 +37,10 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
     iniciarDeteccion();
   };
 
-
   const iniciarDeteccion = () => {
     const video = webcamRef.current.video;
     let intentos = 0;
-    const maxIntentos = 20;
+    const maxIntentos = 40;
 
     intervaloRef.current = setInterval(async () => {
       if (!video || procesandoRef.current || yaFinalizadoRef.current) return;
@@ -70,7 +69,7 @@ const FaceRecognitionModal = ({ show, onSuccess, onFailure, usuario, onClose }) 
       } else {
         finalizarProceso(true);
       }
-    }, 500);
+    }, 700);
   };
 
   const finalizarProceso = (exito) => {
